@@ -11,8 +11,14 @@ function bind(obj,eventStr,callback){
     }
 }
 
+let isFormData = (v) => {
+  return Object.prototype.toString.call(v) === '[object FormData]';
+}
+let isObject = (v) => {
+  return Object.prototype.toString.call(v) === '[object Object]';
+}
 function ajax(obj) {
-  var ajaxRequest = new XMLHttpRequest();
+  var ajaxRequest = new window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
   var method = obj.method.toUpperCase();
   var url = obj.url;
   var data = obj.data;
@@ -29,7 +35,12 @@ function ajax(obj) {
     ajaxRequest.send();
   } else if (method === "POST") {
     ajaxRequest.open(method, url);
-    ajaxRequest.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    if(isFormData(data)){
+      ajaxRequest.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=utf-8");
+    }else if(isObject(data)){
+      ajaxRequest.setRequestHeader("Content-type","application/json; charset=utf-8");
+      data = JSON.stringify(data)
+    }
     ajaxRequest.send(data);
   }
 
